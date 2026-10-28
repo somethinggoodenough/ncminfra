@@ -1,0 +1,292 @@
+{
+  "kind": "single-device-correctness",
+  "split": 5,
+  "status": "PASS",
+  "boundaries": [
+    {
+      "cfg": 0,
+      "split": 1,
+      "samples": 4,
+      "pass": true
+    },
+    {
+      "cfg": 0,
+      "split": 2,
+      "samples": 4,
+      "pass": true
+    },
+    {
+      "cfg": 0,
+      "split": 3,
+      "samples": 4,
+      "pass": true
+    },
+    {
+      "cfg": 0,
+      "split": 4,
+      "samples": 4,
+      "pass": true
+    },
+    {
+      "cfg": 0,
+      "split": 5,
+      "samples": 4,
+      "pass": true
+    },
+    {
+      "cfg": 0,
+      "split": 6,
+      "samples": 4,
+      "pass": true
+    },
+    {
+      "cfg": 0,
+      "split": 7,
+      "samples": 4,
+      "pass": true
+    },
+    {
+      "cfg": 0,
+      "split": 8,
+      "samples": 4,
+      "pass": true
+    },
+    {
+      "cfg": 0,
+      "split": 9,
+      "samples": 4,
+      "pass": true
+    },
+    {
+      "cfg": 0,
+      "split": 10,
+      "samples": 4,
+      "pass": true
+    },
+    {
+      "cfg": 1,
+      "split": 1,
+      "samples": 4,
+      "pass": true
+    },
+    {
+      "cfg": 1,
+      "split": 2,
+      "samples": 4,
+      "pass": true
+    },
+    {
+      "cfg": 1,
+      "split": 3,
+      "samples": 4,
+      "pass": true
+    },
+    {
+      "cfg": 1,
+      "split": 4,
+      "samples": 4,
+      "pass": true
+    },
+    {
+      "cfg": 1,
+      "split": 5,
+      "samples": 4,
+      "pass": true
+    },
+    {
+      "cfg": 1,
+      "split": 6,
+      "samples": 4,
+      "pass": true
+    },
+    {
+      "cfg": 1,
+      "split": 7,
+      "samples": 4,
+      "pass": true
+    },
+    {
+      "cfg": 1,
+      "split": 8,
+      "samples": 4,
+      "pass": true
+    },
+    {
+      "cfg": 1,
+      "split": 9,
+      "samples": 4,
+      "pass": true
+    },
+    {
+      "cfg": 1,
+      "split": 10,
+      "samples": 4,
+      "pass": true
+    }
+  ],
+  "quality": {
+    "cfg0": {
+      "count": 3003,
+      "all_codes_equal": true,
+      "all_ids_equal": true,
+      "all_text_equal": true,
+      "codes_sha256": "836d1b0f0202ab73c03a1d00235fbec739cd4724fa807847f7bb9258f85a2ca4",
+      "token_ids_sha256": "c274657f93c9f1d603a7298817f05acf650d6308d9b6d8113b5fd6fc098612aa"
+    },
+    "cfg1": {
+      "count": 3003,
+      "all_codes_equal": true,
+      "all_ids_equal": true,
+      "all_text_equal": true,
+      "codes_sha256": "33952bb4af0d0722e452d398610e3623bdd94f9d837f4fb3347a7b0518819e2a",
+      "token_ids_sha256": "25b671e0c53b6e530918cbc4f37141ba556af7e44d9b5555501caa0234eb17d5"
+    }
+  },
+  "implementation_commit": "7be0a9b4da439688fc0dbd3b8f33f3f976957af6",
+  "current_code_commit": "dae2e4240b4c63044cd1dd354677edf5d2f48e99",
+  "environment": {
+    "schema_version": 2,
+    "command": [
+      "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\worktrees\\f00\\.venv\\Scripts\\python.exe",
+      "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\worktrees\\f00\\benchmarks\\e2e\\evaluate_groups.py",
+      "--worker",
+      "--output",
+      "reports\\raw\\F11-v1\\run-20261023\\correctness.json",
+      "--budget-seconds",
+      "840"
+    ],
+    "gc_enabled": true,
+    "sdpa_enabled": {
+      "flash": true,
+      "math": true,
+      "mem_efficient": true
+    },
+    "implementation_sha": "7be0a9b4da439688fc0dbd3b8f33f3f976957af6",
+    "source_hashes": {
+      "benchmarks\\e2e\\__init__.py": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "benchmarks\\e2e\\_f00.py": "88e4093d5c0f6f7cb2d9451f3bb186d2a8b2f08276526d675e9a61f16f7719c7",
+      "benchmarks\\e2e\\baseline.py": "52d69edd0d81918b982cd2241b958f4510fc54ee73e5e96e0d974cc9e50c2032",
+      "benchmarks\\e2e\\evaluate_groups.py": "5be40e67fbb88b624c65726f17385ef6f8126389f238b4d888a9bfd9e1d543bf",
+      "benchmarks\\e2e\\level_groups.py": "66fc9cdebbc366f6e9b23615ad5ed439cc61b29297ba8c996fa3b7ebd0b024b4",
+      "benchmarks\\e2e\\native_reference.py": "7465258ff8c53211507c30fbff59f49c3f253ed8c3033f17f98c04cb9773cff8",
+      "benchmarks\\e2e\\summarize_f00.py": "fcc40796654cbc972252c0bbf8d081492ccde8a0ee49430e4e964c0755ce429d"
+    },
+    "baseline_sha": "c70274273f489abc73832b2b98584a8483b6b203",
+    "checkpoint_revision": "d342ce8aaea58830eef3b8ad473664673e41f692",
+    "dataset_revision": "6580ba41a4b0a976dde876fbe84d25327617b0e6",
+    "tokenizer_revision": "c1899de289a04d12100db370d81485cdf75e47ca",
+    "python": "3.11.15",
+    "platform": "Windows-10-10.0.19045-SP0",
+    "torch": "2.6.0+cu118",
+    "torch_cuda": "11.8",
+    "cuda_available": true,
+    "gpu": "NVIDIA GeForce RTX 4060",
+    "driver": "560.94",
+    "tf32_matmul": false,
+    "tf32_cudnn": false,
+    "num_threads": 1,
+    "num_interop_threads": 1,
+    "files": {
+      "generator": {
+        "path": "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\worktrees\\f00\\artifacts\\wmt14\\generator.pt",
+        "bytes": 480582539,
+        "sha256": "ae580cbbb400a27b30c616634745d4c9cfa8b66806f936c6c26041e5b9640d4f"
+      },
+      "tokenizer": {
+        "path": "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\worktrees\\f00\\artifacts\\wmt14\\tokenizer.pt",
+        "bytes": 645790351,
+        "sha256": "74f04176a3cd985e4142761bd7464ea6edb44dc0025c40302b5e45ea0d865702"
+      },
+      "config": {
+        "path": "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\worktrees\\f00\\artifacts\\wmt14\\config.yaml",
+        "bytes": 2177,
+        "sha256": "6401af2a14d41c6582c3181a0b683e8970c1eeefe8cf7afaf74f1597da3fcd72"
+      },
+      "sources": {
+        "path": "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\worktrees\\f00\\data\\wmt14\\sources.pickle",
+        "bytes": 406100,
+        "sha256": "62254653c32ce9e8b93576797597381babaab301b10ee0a2a3babec89576ea43"
+      },
+      "references": {
+        "path": "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\worktrees\\f00\\data\\wmt14\\reference_translations.pickle",
+        "bytes": 366263,
+        "sha256": "3dcef81d8aeded13f79917cd6b794d2ca9f33223bf35c1fff1c5643eae0df52b"
+      },
+      "qwen_tokenizer": {
+        "path": "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\worktrees\\f00\\artifacts\\qwen3-0.6b-tokenizer\\tokenizer.json",
+        "bytes": 11422654,
+        "sha256": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4"
+      },
+      "eval_config": {
+        "path": "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\worktrees\\f00\\config\\eval\\wmt14.yaml",
+        "bytes": 2294,
+        "sha256": "6469ffcfcda5e048042ae97945e125c80faddfac7935d7648d51ac9487321a3d"
+      }
+    }
+  },
+  "source_matches_current": {
+    "benchmarks/e2e/level_groups.py": true,
+    "benchmarks/e2e/evaluate_groups.py": true
+  },
+  "raw_sha256": {
+    "reports/raw/F11-v1/run-20261023/correctness.json": "a28fd5c6903a62cfa639fd771ef93b53ced65ffa92c335506aa2216cc245d025",
+    "reports/raw/F11-v1/run-20261023/correctness.budget.json": "9a76bbeb0d34e5fc0fbe20d3dbe7eb37a9567990d3f91c3103d08dbcc2941d0f",
+    "reports/raw/F11-v1/run-20261023/f11-quality-cfg0.json": "4aa5cc63bfcab9e5d108fcb47e66d772c2258757dbacd07f7d0efc26eed21f34",
+    "reports/raw/F11-v1/run-20261023/f11-quality-cfg1.json": "0a36f68937dbffdd277c94b28d7f15377695841538a2eea8392ba17e765c1d08"
+  },
+  "budget": {
+    "status": "PASS",
+    "command": [
+      "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\worktrees\\f00\\.venv\\Scripts\\python.exe",
+      "-m",
+      "benchmarks.e2e.evaluate_groups",
+      "--worker",
+      "--output",
+      "reports\\raw\\F11-v1\\run-20261023\\correctness.json",
+      "--budget-seconds",
+      "840"
+    ],
+    "wall_seconds": 429.76600000006147,
+    "cap_seconds": 840,
+    "accounting": "conservative whole child process wall time, one GPU"
+  },
+  "quality_metrics_from_identical_outputs": {
+    "cfg0": {
+      "count": 3003,
+      "native_text_exact_matches": 3003,
+      "native_text_all_equal": true,
+      "bleu": 21.72021808179737,
+      "bleu_signature": "nrefs:1|case:mixed|eff:no|tok:13a|smooth:exp|version:2.5.1",
+      "bleu_lowercase": 22.61211473820969,
+      "bleu_lowercase_signature": "nrefs:1|case:lc|eff:no|tok:13a|smooth:exp|version:2.5.1",
+      "chrf": 49.5648602802545,
+      "chrf_signature": "nrefs:1|case:mixed|eff:yes|nc:6|nw:0|space:no|version:2.5.1",
+      "length_ratio": 0.9304542821925539,
+      "codes_sha256": "836d1b0f0202ab73c03a1d00235fbec739cd4724fa807847f7bb9258f85a2ca4",
+      "token_ids_sha256": "c274657f93c9f1d603a7298817f05acf650d6308d9b6d8113b5fd6fc098612aa",
+      "native_codes_all_equal": true,
+      "native_token_ids_all_equal": true,
+      "native_codes_sha256": "836d1b0f0202ab73c03a1d00235fbec739cd4724fa807847f7bb9258f85a2ca4",
+      "native_token_ids_sha256": "c274657f93c9f1d603a7298817f05acf650d6308d9b6d8113b5fd6fc098612aa"
+    },
+    "cfg1": {
+      "count": 3003,
+      "native_text_exact_matches": 3003,
+      "native_text_all_equal": true,
+      "bleu": 22.94640944002923,
+      "bleu_signature": "nrefs:1|case:mixed|eff:no|tok:13a|smooth:exp|version:2.5.1",
+      "bleu_lowercase": 23.83581670062912,
+      "bleu_lowercase_signature": "nrefs:1|case:lc|eff:no|tok:13a|smooth:exp|version:2.5.1",
+      "chrf": 51.51597667165391,
+      "chrf_signature": "nrefs:1|case:mixed|eff:yes|nc:6|nw:0|space:no|version:2.5.1",
+      "length_ratio": 0.9481859898718387,
+      "codes_sha256": "33952bb4af0d0722e452d398610e3623bdd94f9d837f4fb3347a7b0518819e2a",
+      "token_ids_sha256": "25b671e0c53b6e530918cbc4f37141ba556af7e44d9b5555501caa0234eb17d5",
+      "native_codes_all_equal": true,
+      "native_token_ids_all_equal": true,
+      "native_codes_sha256": "33952bb4af0d0722e452d398610e3623bdd94f9d837f4fb3347a7b0518819e2a",
+      "native_token_ids_sha256": "25b671e0c53b6e530918cbc4f37141ba556af7e44d9b5555501caa0234eb17d5"
+    }
+  },
+  "performance_status": "NOT_MEASURED"
+}

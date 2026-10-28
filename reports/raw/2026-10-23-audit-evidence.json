@@ -1,0 +1,150 @@
+{
+  "audit_date": "2026-10-23",
+  "timezone": "America/New_York",
+  "scope": "Read-only source/environment audit; documentation only. No implementation, new tests, dependency installs, checkpoints, datasets, benchmarks, or sub-agents.",
+  "upstream": {
+    "url": "https://github.com/HazyResearch/ncm.git",
+    "branch": "main",
+    "sha": "c70274273f489abc73832b2b98584a8483b6b203",
+    "local": "upstream/ncm",
+    "checkout": "detached HEAD",
+    "initial_workspace": "Only NCM_Codex_Kickoff_Checklist.md; workspace root was not a git repository.",
+    "final_source_status": "clean"
+  },
+  "checklist_sha256": "d151eb6a2e10fb031022803d80c2b9ffb9149ec57f7fa8d9a8891e21c4d2f617",
+  "pulls": [
+    {
+      "number": 14,
+      "title": "Validate evaluation shards and correct malformed-output scoring",
+      "state": "open",
+      "merged_at": null,
+      "head_sha": "64a7452a1bcecafcb16a6cdbb90cf1357e70d7e7",
+      "base_sha": "c70274273f489abc73832b2b98584a8483b6b203",
+      "url": "https://github.com/HazyResearch/ncm/pull/14"
+    },
+    {
+      "number": 13,
+      "title": "Fix reconstruction snapshots and preserve text across tokenizer blocks",
+      "state": "open",
+      "merged_at": null,
+      "head_sha": "fb056ccc0c05168671d04ebb95d23e939c25c1c7",
+      "base_sha": "c70274273f489abc73832b2b98584a8483b6b203",
+      "url": "https://github.com/HazyResearch/ncm/pull/13"
+    },
+    {
+      "number": 12,
+      "title": "Add adaptive Sudoku early exit and concept-level budgets",
+      "state": "open",
+      "merged_at": null,
+      "head_sha": "5429ff00d970ae1e87630845b06a596a122b3332",
+      "base_sha": "c70274273f489abc73832b2b98584a8483b6b203",
+      "url": "https://github.com/HazyResearch/ncm/pull/12"
+    },
+    {
+      "number": 7,
+      "title": "feat(arch): introduce NCM tring architecture with FSQ, Jacobi self-correction, and coupled decoding",
+      "state": "open",
+      "merged_at": null,
+      "head_sha": "d7377f42dfb5661a22d4b98a4c50f5420965111c",
+      "base_sha": "c70274273f489abc73832b2b98584a8483b6b203",
+      "url": "https://github.com/HazyResearch/ncm/pull/7"
+    },
+    {
+      "number": 6,
+      "title": "Run evaluation on Apple silicon (MPS) and CPU",
+      "state": "open",
+      "merged_at": null,
+      "head_sha": "1281b689a4113cd6d88a380943165b60f9f9a805",
+      "base_sha": "c70274273f489abc73832b2b98584a8483b6b203",
+      "url": "https://github.com/HazyResearch/ncm/pull/6"
+    },
+    {
+      "number": 5,
+      "title": "Fix the KV-cached generate() path: identical outputs, 2-5x faster",
+      "state": "open",
+      "merged_at": null,
+      "head_sha": "60c947b01510dedac7fe4d4797d9eade0e018d4c",
+      "base_sha": "c70274273f489abc73832b2b98584a8483b6b203",
+      "url": "https://github.com/HazyResearch/ncm/pull/5"
+    },
+    {
+      "number": 4,
+      "title": "Fix memory leak in generate(): read raw_token_prefix/contextual_prefix once",
+      "state": "open",
+      "merged_at": null,
+      "head_sha": "766e7d0043d439174e70cebd10c92d49b4b69d55",
+      "base_sha": "c70274273f489abc73832b2b98584a8483b6b203",
+      "url": "https://github.com/HazyResearch/ncm/pull/4"
+    },
+    {
+      "number": 1,
+      "title": "Update citation and paper links in README",
+      "state": "closed",
+      "merged_at": "2026-10-14T05:17:10Z",
+      "head_sha": "c37e7784b1b6d9622b405b078bb038b4a135b330",
+      "base_sha": "7034e23457cf2606459115505b86cd33c484e583",
+      "url": "https://github.com/HazyResearch/ncm/pull/1"
+    }
+  ],
+  "observations": [
+    {
+      "command": "nvidia-smi --query-gpu=name,uuid,driver_version,memory.total,memory.free,pci.bus_id --format=csv",
+      "output": "name, uuid, driver_version, memory.total [MiB], memory.free [MiB], pci.bus_id\r\nNVIDIA GeForce RTX 4060, GPU-b5610451-348f-6715-9bcc-d0027d694f2e, 560.94, 8188 MiB, 6761 MiB, 00000000:2B:00.0\r\n"
+    },
+    {
+      "command": "nvidia-smi topo -m",
+      "output": "ERROR: Option -m is missing its value. Please run 'nvidia-smi -h' for help.",
+      "status": "FAILED; topology not verified"
+    },
+    {
+      "command": "nvcc --version",
+      "output": "CUDA compilation tools, release 11.8, V11.8.89"
+    },
+    {
+      "command": "python --version",
+      "output": "Python 3.8.5"
+    },
+    {
+      "command": "py -0p",
+      "output": "No installed Pythons found!"
+    },
+    {
+      "command": "Python importlib.metadata package inventory; no package imports or downloads",
+      "output": "C:\\Users\\admin\\PycharmProjects\\pythonProject\\venv\\Scripts\\python.exe\r\nWindows-10-10.0.19041-SP0\r\ntorch=1.12.1\r\ntorchvision=NOT_INSTALLED\r\ntorchaudio=NOT_INSTALLED\r\nnumpy=NOT_INSTALLED\r\ntransformers=NOT_INSTALLED\r\ndatasets=NOT_INSTALLED\r\neinops=NOT_INSTALLED\r\ntqdm=4.67.3\r\nPyYAML=NOT_INSTALLED\r\nomegaconf=NOT_INSTALLED\r\nsafetensors=NOT_INSTALLED\r\nhuggingface-hub=NOT_INSTALLED\r\npytest=NOT_INSTALLED\r\nscipy=NOT_INSTALLED\r\ntriton=NOT_INSTALLED\r\nsacrebleu=NOT_INSTALLED\r\nrouge-score=NOT_INSTALLED\r\nnltk=NOT_INSTALLED\r\n"
+    },
+    {
+      "command": "import torch; print torch version/build CUDA/is_available/device_count/SDPA availability",
+      "output": "torch= 1.12.1+cpu\r\nbuilt_cuda= None\r\ncuda_available= False\r\ndevice_count= 0\r\nsdpa_available= False\r\n"
+    },
+    {
+      "command": "AST parse all upstream *.py in memory; search existing tests; inspect disk; hash checklist",
+      "output": "{\"check\": \"Python AST syntax only; no execution or behavioral tests\", \"files\": 20, \"errors\": []}\r\ntests= []\r\nworkspace_disk= usage(total=3463319568384, used=2835705151488, free=627614416896)\r\nchecklist_sha256= d151eb6a2e10fb031022803d80c2b9ffb9149ec57f7fa8d9a8891e21c4d2f617\r\n"
+    },
+    {
+      "command": "git status --porcelain=v1; git diff --check",
+      "output": "",
+      "status": "PASS; upstream checkout clean"
+    },
+    {
+      "command": "Get-CimInstance Win32_OperatingSystem / Win32_ComputerSystem",
+      "status": "DENIED in sandbox; physical RAM unknown"
+    },
+    {
+      "command": "Get-Command cl,gcc,clang -ErrorAction SilentlyContinue",
+      "output": "No commands found on current PATH; not a full installation inventory"
+    },
+    {
+      "command": "nvidia-smi --query-gpu=count,name,memory.total,memory.free,driver_model.current --format=csv",
+      "output": "1, NVIDIA GeForce RTX 4060, 8188 MiB, 6818 MiB, WDDM"
+    }
+  ],
+  "limitations": [
+    "20 Python files parsed successfully; syntax parsing is not correctness testing.",
+    "No tracked test suite/CI found at baseline. Embedded model demos and evaluation not run due missing/incompatible dependencies.",
+    "HF file pages/tree API inaccessible via web tool; checkpoint/dataset revision, hashes, and download byte sizes remain unknown.",
+    "PR #5 diff inspected; other PR summaries are metadata/author claims plus relevant upstream source inspection, not independently executed.",
+    "Paper identity/version/abstract verified; Weave v2 and SplitZip v3 relevant HTML sections inspected. Not a complete reproduction or novelty review.",
+    "Initial git clone blocked by sandbox network; escalated clone succeeded. Repository ownership mismatch addressed only with command-scoped safe.directory, not global git config.",
+    "No GPU inference/profile/quality/throughput result exists in this audit."
+  ]
+}
