@@ -1,0 +1,3 @@
+[submodule "upstream/ncm"]
+	path = upstream/ncm
+	url = https://github.com/somethinggoodenough/ncm.git
