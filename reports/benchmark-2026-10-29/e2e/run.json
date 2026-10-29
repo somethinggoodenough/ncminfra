@@ -1,0 +1,8 @@
+{
+  "schema": "ncm-benchmark-v1",
+  "status": "COMPLETE",
+  "provenance_valid": true,
+  "manifest_sha256": "820e25b86c88c5697785856610e1b7f0f28a477629bcdb135db92ec75a324982",
+  "windows_sha256": "dd7856cfbf4a363c4247b8b1a1a8f199a932ebdbf184166ac6757b1765981b2b",
+  "quality_sha256": "5ece595a6260839127175504927a6ffff871e4f2c925193412c5f08008edfe1f"
+}

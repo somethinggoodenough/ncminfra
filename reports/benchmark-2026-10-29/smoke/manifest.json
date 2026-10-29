@@ -1,0 +1,518 @@
+{
+  "schema": "ncm-benchmark-v1",
+  "created_utc": "2026-10-29T08:09:44.965739+00:00",
+  "command": [
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\benchmarks\\wmt14.py",
+    "--mode",
+    "e2e",
+    "--systems",
+    "eager,cache",
+    "--batches",
+    "8",
+    "--cfg",
+    "0,1",
+    "--n",
+    "8",
+    "--windows",
+    "1",
+    "--warmup-min",
+    "10",
+    "--warmup-max",
+    "50",
+    "--output",
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\reports\\benchmark-2026-10-29\\smoke",
+    "--config",
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\worktrees\\f00\\artifacts\\wmt14\\config.yaml",
+    "--checkpoints",
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\worktrees\\f00\\artifacts\\wmt14",
+    "--sources",
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\worktrees\\f00\\data\\wmt14\\sources.pickle",
+    "--tokenizer",
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\worktrees\\f00\\artifacts\\qwen3-0.6b-tokenizer"
+  ],
+  "mode": "e2e",
+  "systems": [
+    "eager",
+    "cache"
+  ],
+  "candidate_path": null,
+  "plan": [
+    {
+      "cfg": 0.0,
+      "batch_size": 8,
+      "arrival_rate_per_second": null,
+      "orders": [
+        [
+          "eager",
+          "cache"
+        ]
+      ]
+    },
+    {
+      "cfg": 1.0,
+      "batch_size": 8,
+      "arrival_rate_per_second": null,
+      "orders": [
+        [
+          "cache",
+          "eager"
+        ]
+      ]
+    }
+  ],
+  "candidate_profile_token_rows": null,
+  "device": "cuda:0",
+  "gpu": "NVIDIA GeForce RTX 4060",
+  "gpu_properties": "_CudaDeviceProperties(name='NVIDIA GeForce RTX 4060', major=8, minor=9, total_memory=8187MB, multi_processor_count=24, uuid=b5610451-348f-6715-9bcc-d0027d694f2e, L2_cache_size=24MB)",
+  "nvidia_smi": "0, NVIDIA GeForce RTX 4060, GPU-b5610451-348f-6715-9bcc-d0027d694f2e, 560.94, 8188",
+  "python": "3.11.15 (main, May 10 2026, 19:31:25) [MSC v.1944 64 bit (AMD64)]",
+  "platform": "Windows-10-10.0.19045-SP0",
+  "torch": "2.6.0+cu118",
+  "cuda_runtime": "11.8",
+  "cudnn": 90100,
+  "tf32_matmul": false,
+  "tf32_cudnn": false,
+  "sdpa": {
+    "flash": true,
+    "math": true,
+    "mem_efficient": true
+  },
+  "dtype": "float32",
+  "autocast": false,
+  "num_threads": 1,
+  "packages": {
+    "torch": "2.6.0+cu118",
+    "numpy": "1.26.4",
+    "transformers": "4.51.3",
+    "omegaconf": "2.3.0",
+    "hydra-core": "1.3.2"
+  },
+  "environment_packages": [
+    {
+      "name": "antlr4-python3-runtime",
+      "version": "4.9.3"
+    },
+    {
+      "name": "certifi",
+      "version": "2026.10.19"
+    },
+    {
+      "name": "charset-normalizer",
+      "version": "3.5.2"
+    },
+    {
+      "name": "colorama",
+      "version": "0.4.6"
+    },
+    {
+      "name": "filelock",
+      "version": "3.32.3"
+    },
+    {
+      "name": "fsspec",
+      "version": "2026.7.0"
+    },
+    {
+      "name": "huggingface-hub",
+      "version": "0.31.4"
+    },
+    {
+      "name": "hydra-core",
+      "version": "1.3.2"
+    },
+    {
+      "name": "idna",
+      "version": "3.20"
+    },
+    {
+      "name": "Jinja2",
+      "version": "3.1.6"
+    },
+    {
+      "name": "lxml",
+      "version": "6.1.3"
+    },
+    {
+      "name": "MarkupSafe",
+      "version": "3.0.3"
+    },
+    {
+      "name": "mpmath",
+      "version": "1.3.0"
+    },
+    {
+      "name": "networkx",
+      "version": "3.6.1"
+    },
+    {
+      "name": "numpy",
+      "version": "1.26.4"
+    },
+    {
+      "name": "omegaconf",
+      "version": "2.3.0"
+    },
+    {
+      "name": "packaging",
+      "version": "26.3"
+    },
+    {
+      "name": "portalocker",
+      "version": "4.4.1"
+    },
+    {
+      "name": "PyYAML",
+      "version": "6.0.3"
+    },
+    {
+      "name": "regex",
+      "version": "2024.11.6"
+    },
+    {
+      "name": "requests",
+      "version": "2.34.2"
+    },
+    {
+      "name": "sacrebleu",
+      "version": "2.5.1"
+    },
+    {
+      "name": "safetensors",
+      "version": "0.8.0"
+    },
+    {
+      "name": "sympy",
+      "version": "1.13.1"
+    },
+    {
+      "name": "tabulate",
+      "version": "0.10.0"
+    },
+    {
+      "name": "tokenizers",
+      "version": "0.21.4"
+    },
+    {
+      "name": "torch",
+      "version": "2.6.0+cu118"
+    },
+    {
+      "name": "tqdm",
+      "version": "4.70.1"
+    },
+    {
+      "name": "transformers",
+      "version": "4.51.3"
+    },
+    {
+      "name": "typing_extensions",
+      "version": "4.16.0"
+    },
+    {
+      "name": "urllib3",
+      "version": "2.8.0"
+    }
+  ],
+  "root_git": {
+    "error": "Command '['git', '-C', 'C:\\\\Users\\\\admin\\\\Documents\\\\NCM Serving Optimization', 'rev-parse', 'HEAD']' returned non-zero exit status 128."
+  },
+  "upstream_git": {
+    "error": "Command '['git', '-C', 'C:\\\\Users\\\\admin\\\\Documents\\\\NCM Serving Optimization\\\\upstream\\\\ncm', 'rev-parse', 'HEAD']' returned non-zero exit status 128."
+  },
+  "source_fingerprint": {
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\benchmarks\\__init__.py": "2b7d0a2dee925310e8312472d6bea37d838a3aa0e18f2ee436a5eedbcb04b6db",
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\benchmarks\\core.py": "2e1cf8c4d8945dd1cb14ee4ec48ecb3d6fa206751b02cddee02a07095094fd7d",
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\benchmarks\\plots.py": "22289fa6f93eb56675bb0ae9ebce87bafb28921bcd608e843639f1511c37c0b7",
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\benchmarks\\wmt14.py": "5e57654e5c59929cfe31818429adec7bc76f91d8e21831825b7e5caf773d44a0",
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\upstream\\ncm\\models\\__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\upstream\\ncm\\models\\common.py": "b4dc655530ccb77454ef2331f0a849cf4809a68c08ba6e69307d8539e9e370fc",
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\upstream\\ncm\\models\\next_concept.py": "e9d3ac842d2c0c255b284a4e85197dd1b2200d1333ac41533d300d31948562c4",
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\upstream\\ncm\\models\\quant.py": "44315b9662fb28ea3db9a7c0d14556df49e80e706df9a460792a4a9d82549949",
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\upstream\\ncm\\models\\vae.py": "a509b033bcafcb147f9fae5328c33f02b6e2180969848a9c9953618f9089a1a5",
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\upstream\\ncm\\models\\vqvae.py": "a0e5c9157989995121e842d3434310b4fc940892028cc9c2e258571739965923",
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\upstream\\ncm\\tokenization\\__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\upstream\\ncm\\tokenization\\bpe_tokenizer.py": "9db223e7c2b5d49cc5e24c58b4cd1ddd1976553f44b964decc353650cb207540",
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\upstream\\ncm\\tokenization\\hf_tokenizer.py": "663e435aea5255464a20bdce058287aebb8ad1904f38ac8157125803dcbaa8a0",
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\upstream\\ncm\\tokenization\\sudoku_tokenizer.py": "ccd2637722c2627e3975594d3b00c917721f92489ccb65a62108da7a46a5e701",
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\upstream\\ncm\\tokenization\\tokenizer.py": "dcc50996d34f99c9919f92b3eeb97912b3032b946a4d84d69479507c7802428c",
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\upstream\\ncm\\tokenization\\vqvae_tokenizer.py": "a41215ad73e626c30882d1e9fa5bcd7753ced73307516fae0ec9815325445fc1",
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\upstream\\ncm\\utils\\__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\upstream\\ncm\\utils\\misc.py": "940a7a6b72a1886158b57beb28f7f839ddc35bf7d4d6987d8244800d2f54145c",
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\upstream\\ncm\\utils\\registry.py": "7348ce9bc893798ac6cd11a0316cd2a5bae5b2eb39ed04b70d526e0e76c3a006"
+  },
+  "asset_hashes": {
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\worktrees\\f00\\artifacts\\qwen3-0.6b-tokenizer\\config.json": "660db3b73d788119c04535e48cf9be5f55bc3100841a718637ae695b442f27dd",
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\worktrees\\f00\\artifacts\\qwen3-0.6b-tokenizer\\generation_config.json": "2325da0f15bb848e018c5ae071b7943332e9f871d6b60e2ed22ca97d4cb993d2",
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\worktrees\\f00\\artifacts\\qwen3-0.6b-tokenizer\\merges.txt": "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5",
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\worktrees\\f00\\artifacts\\qwen3-0.6b-tokenizer\\tokenizer.json": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\worktrees\\f00\\artifacts\\qwen3-0.6b-tokenizer\\tokenizer_config.json": "d5d09f07b48c3086c508b30d1c9114bd1189145b74e982a265350c923acd8101",
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\worktrees\\f00\\artifacts\\qwen3-0.6b-tokenizer\\vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910",
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\worktrees\\f00\\artifacts\\wmt14\\config.yaml": "6401af2a14d41c6582c3181a0b683e8970c1eeefe8cf7afaf74f1597da3fcd72",
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\worktrees\\f00\\artifacts\\wmt14\\generator.pt": "ae580cbbb400a27b30c616634745d4c9cfa8b66806f936c6c26041e5b9640d4f",
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\worktrees\\f00\\artifacts\\wmt14\\tokenizer.pt": "74f04176a3cd985e4142761bd7464ea6edb44dc0025c40302b5e45ea0d865702",
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\worktrees\\f00\\data\\wmt14\\sources.pickle": "62254653c32ce9e8b93576797597381babaab301b10ee0a2a3babec89576ea43"
+  },
+  "download_metadata": {
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\worktrees\\f00\\artifacts\\qwen3-0.6b-tokenizer\\config.json": {
+      "revision": "c1899de289a04d12100db370d81485cdf75e47ca",
+      "etag": "f5c3703b78ae2a478ae15b247e9f855e0ce2107b",
+      "metadata_sha256": "962dd529aea481935a9b7bea1633755aade33f45bda9644bf9e1e3318674b84e",
+      "note": "local download metadata; file SHA-256 recorded separately"
+    },
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\worktrees\\f00\\artifacts\\qwen3-0.6b-tokenizer\\generation_config.json": {
+      "revision": "c1899de289a04d12100db370d81485cdf75e47ca",
+      "etag": "20a8a9156fc8c3f25295ca067f61fdf120d517c5",
+      "metadata_sha256": "a2b7a53ed84394e77b5be920767d117307929c2be18263f79704ff59435ddc26",
+      "note": "local download metadata; file SHA-256 recorded separately"
+    },
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\worktrees\\f00\\artifacts\\qwen3-0.6b-tokenizer\\merges.txt": {
+      "revision": "c1899de289a04d12100db370d81485cdf75e47ca",
+      "etag": "31349551d90c7606f325fe0f11bbb8bd5fa0d7c7",
+      "metadata_sha256": "abef7a7d9d4a7e108f26e2abb2f20eae46d1dbc3888c940b08dcf6d1932a3314",
+      "note": "local download metadata; file SHA-256 recorded separately"
+    },
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\worktrees\\f00\\artifacts\\qwen3-0.6b-tokenizer\\tokenizer.json": {
+      "revision": "c1899de289a04d12100db370d81485cdf75e47ca",
+      "etag": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+      "metadata_sha256": "f30387f0d97b6bf1c73acbaf57be9258856659e06d247b5db1602a4021a7eb46",
+      "note": "local download metadata; file SHA-256 recorded separately"
+    },
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\worktrees\\f00\\artifacts\\qwen3-0.6b-tokenizer\\tokenizer_config.json": {
+      "revision": "c1899de289a04d12100db370d81485cdf75e47ca",
+      "etag": "417d038a63fa3de29cfde265caedae14d1a58d92",
+      "metadata_sha256": "23ac86f9a201e604241dca04bf5c8068605dc4dcbe490fb5fd141547653e778c",
+      "note": "local download metadata; file SHA-256 recorded separately"
+    },
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\worktrees\\f00\\artifacts\\qwen3-0.6b-tokenizer\\vocab.json": {
+      "revision": "c1899de289a04d12100db370d81485cdf75e47ca",
+      "etag": "4783fe10ac3adce15ac8f358ef5462739852c569",
+      "metadata_sha256": "e0553b2498175c411dd40b730a30414211265e112be5b431da9edb85a626a0be",
+      "note": "local download metadata; file SHA-256 recorded separately"
+    },
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\worktrees\\f00\\artifacts\\wmt14\\config.yaml": {
+      "revision": "d342ce8aaea58830eef3b8ad473664673e41f692",
+      "etag": "6826002535d2b9b62298f4e041b929232055b6fa",
+      "metadata_sha256": "e3116313d88d8868c5084cfbfd5bc1341c7310bd07864fb289c87705dd72bea3",
+      "note": "local download metadata; file SHA-256 recorded separately"
+    },
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\worktrees\\f00\\artifacts\\wmt14\\generator.pt": {
+      "revision": "d342ce8aaea58830eef3b8ad473664673e41f692",
+      "etag": "ae580cbbb400a27b30c616634745d4c9cfa8b66806f936c6c26041e5b9640d4f",
+      "metadata_sha256": "e94b9513380700449d1bce00f153f2c47815c227d1ec4fad913a31e305019d1a",
+      "note": "local download metadata; file SHA-256 recorded separately"
+    },
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\worktrees\\f00\\artifacts\\wmt14\\tokenizer.pt": {
+      "revision": "d342ce8aaea58830eef3b8ad473664673e41f692",
+      "etag": "74f04176a3cd985e4142761bd7464ea6edb44dc0025c40302b5e45ea0d865702",
+      "metadata_sha256": "02e114ba5a943c6ef28d156c10845a63cb6f026623bf9a07720befa68eaf94b4",
+      "note": "local download metadata; file SHA-256 recorded separately"
+    },
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\worktrees\\f00\\data\\wmt14\\sources.pickle": {
+      "revision": "6580ba41a4b0a976dde876fbe84d25327617b0e6",
+      "etag": "62254653c32ce9e8b93576797597381babaab301b10ee0a2a3babec89576ea43",
+      "metadata_sha256": "c8c9a1d1abbf9dc0c5f057926f0c081ca7a4812e7aff96a386935534bef1fc62",
+      "note": "local download metadata; file SHA-256 recorded separately"
+    }
+  },
+  "baseline_resident_allocated_bytes": 1128726016,
+  "model_configuration": {
+    "task": "wmt14",
+    "checkpoints": {
+      "generator": "generator.pt",
+      "tokenizer": "tokenizer.pt"
+    },
+    "data": {
+      "test": "sources.pickle",
+      "test_refs": "reference_translations.pickle"
+    },
+    "model": {
+      "n_layer": 12,
+      "n_head": 12,
+      "bias": true,
+      "dropout": 0.1,
+      "n_embd": 768,
+      "context_length": 160,
+      "prefix_len": 96,
+      "raw_token_prefix": true,
+      "prefix_pad_token_id": 151643,
+      "vocab_size": [
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096
+      ],
+      "predict_level0": true,
+      "attn_pattern": "block_diagonal",
+      "use_positional_encoding": true,
+      "use_level_encoding": true,
+      "use_rope": true,
+      "rope_base": 100000,
+      "use_qk_norm": true,
+      "ctx_encoder": {
+        "enabled": false,
+        "n_layer": 4,
+        "vocab_size": 50304
+      },
+      "use_flex_attention": false,
+      "untied_head_bias": false
+    },
+    "tokenizer": {
+      "pre_tokenizer": {
+        "name": "hf",
+        "tokenizer": "hf",
+        "model_id": "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\worktrees\\f00\\artifacts\\qwen3-0.6b-tokenizer",
+        "special_tokens": {
+          "eos_token": "<|im_end|>",
+          "pad_token": "<|endoftext|>"
+        }
+      },
+      "vqvae": {
+        "n_layers": 6,
+        "embed_dim": 384,
+        "in_vocab_size": 151680,
+        "context_length": 64,
+        "compression_factor": 1,
+        "dropout": 0.1,
+        "pre_quant_groupnorm": 8,
+        "use_qk_norm": true,
+        "pre_quant_dropout": 0.25,
+        "vqvae_vocab_size": [
+          4096,
+          4096,
+          4096,
+          4096,
+          4096,
+          4096,
+          4096,
+          4096,
+          4096,
+          4096,
+          4096
+        ],
+        "checkpoint_path": "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\worktrees\\f00\\artifacts\\wmt14\\tokenizer.pt",
+        "vector_quantizer_config": {
+          "clss": "multiscale_residual_vector_quantizer",
+          "decay": 0.99,
+          "epsilon": 1e-05,
+          "commitment_cost": 0.25,
+          "learned_l1_sampling": true,
+          "learned_l1_cascade": true,
+          "learned_l1_cascade_base": 4,
+          "learned_l1_cascade_norm": true,
+          "learned_l1_cascade_norm_final": true,
+          "learned_all_sampling": false,
+          "quant_resi": {
+            "enabled": true,
+            "ratio": 0.5,
+            "share_mode": 0,
+            "learnable_ratio": false
+          },
+          "aux": {
+            "fine_drop": {
+              "prob": 0.5,
+              "min_keep": 1
+            }
+          },
+          "levels": {
+            "use_manual_levels": true,
+            "manual_levels": [
+              1,
+              4,
+              8,
+              14,
+              20,
+              26,
+              32,
+              40,
+              48,
+              56,
+              64
+            ]
+          }
+        }
+      }
+    },
+    "generation": {
+      "temperature": 1.0,
+      "top_k": 1,
+      "top_p": 0.0,
+      "cfg_scale": 0.0
+    },
+    "eval": {
+      "split": "test",
+      "n_docs": 3003,
+      "batch_size": 64,
+      "n_shards": 2,
+      "metric": "bleu"
+    }
+  },
+  "workload": {
+    "sample_ids": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "token_lengths": [
+      13,
+      60,
+      21,
+      15,
+      30,
+      31,
+      33,
+      41
+    ],
+    "truncated": 0,
+    "padding_tokens": 524,
+    "prefix_ids_sha256": "14403fa71d3fd908408dae7511daf54231bb5baf65511919a5959587c72bb8b5",
+    "prefix_length": 96,
+    "levels": [
+      1,
+      4,
+      8,
+      14,
+      20,
+      26,
+      32,
+      40,
+      48,
+      56,
+      64
+    ],
+    "eos": 151645,
+    "pad": 151643,
+    "temperature": 1.0,
+    "top_k": 1,
+    "top_p": 0.0,
+    "seed": 20261023
+  },
+  "protocol": {
+    "windows_per_cell": 1,
+    "order": "seeded rotating paired windows",
+    "warmup_min": 10,
+    "warmup_max": 50,
+    "warmup_group": 5,
+    "warmup_tolerance": 0.05,
+    "exploratory": true,
+    "window_process": "shared process/model; each window individually warmed; candidate activation outside timing, deactivated between systems",
+    "e2e_boundary": "pretokenized CPU padded IDs through H2D, generate, reconstruct, decoder, argmax and D2H final IDs",
+    "gpu_event_scope": "single current CUDA stream, includes idle gaps; not kernel-only or multistream timing",
+    "e2e_probe": false,
+    "quality": "all selected samples, exact concept codes and token IDs vs eager",
+    "window_overhead": "wall throughput includes seed resets, synchronization and lightweight batch bookkeeping; hashes/counts computed after timing",
+    "profile": "per-level total and stack ranges overlap; level 1 total includes cache prefill; reconstruction and decoder+argmax separate",
+    "serving": "single worker, open-loop scheduled arrivals, queue and service; code and ID D2H included, eager replay excluded"
+  },
+  "load_seconds": 30.645339699985925
+}

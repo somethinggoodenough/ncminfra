@@ -1,0 +1,78 @@
+{
+  "schema": "ncm-benchmark-v1",
+  "command": [
+    "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\benchmarks\\plots.py",
+    "--out",
+    "reports/benchmark-2026-10-29/figures",
+    "--e2e",
+    "reports/benchmark-2026-10-29/e2e",
+    "--profile",
+    "reports/benchmark-2026-10-29/profile",
+    "--serving",
+    "reports/benchmark-2026-10-29/serving",
+    "--plot-batch",
+    "4",
+    "--plot-cfg",
+    "1"
+  ],
+  "matplotlib": "3.10.7",
+  "source_sha256": {
+    "plots.py": "22289fa6f93eb56675bb0ae9ebce87bafb28921bcd608e843639f1511c37c0b7",
+    "core.py": "2e1cf8c4d8945dd1cb14ee4ec48ecb3d6fa206751b02cddee02a07095094fd7d"
+  },
+  "inputs": {
+    "step0": {
+      "prompts": 9,
+      "pearson_r": -0.8875406347264351,
+      "source_sha256": "49b4fbdd173a6c3ae7de6c82837c3dee74127ac7b1889badda16a641944d6cf9"
+    },
+    "e2e": {
+      "path": "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\reports\\benchmark-2026-10-29\\e2e",
+      "manifest_sha256": "820e25b86c88c5697785856610e1b7f0f28a477629bcdb135db92ec75a324982",
+      "run_sha256": "c1571afcadf2a9bf52c6408165ce092eaf99299c2b3b4b98335d3398db19bf84",
+      "run_status": "COMPLETE"
+    },
+    "profile": {
+      "path": "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\reports\\benchmark-2026-10-29\\profile",
+      "manifest_sha256": "b1b6dabfc3b018852b10b051c2e0f4af224e0e2a0687d18ffbfe09d9f94a1024",
+      "run_sha256": "cea54b7f9cf0c40c14498c891cd3ee2b6a285a97cfb62b8454ec272585ed92ce",
+      "run_status": "COMPLETE"
+    },
+    "serving": {
+      "path": "C:\\Users\\admin\\Documents\\NCM Serving Optimization\\reports\\benchmark-2026-10-29\\serving",
+      "manifest_sha256": "d06ea786de81f48722a660c67381db6eacff48f93bddad64750969176a422715",
+      "run_sha256": "5f9e52e72ed8c700266d5570802f6cf8460ca150f1bab32b85c1a0516d433788",
+      "run_status": "COMPLETE"
+    }
+  },
+  "figures": [
+    "step0_relative_l2",
+    "step0_level1_rmse_vs_prompt",
+    "throughput_vs_batch",
+    "memory_vs_batch",
+    "per_level_time",
+    "per_level_total_time",
+    "predicted_vs_measured",
+    "latency_vs_throughput"
+  ],
+  "figure_sha256": {
+    "latency_vs_throughput.png": "72c5824885316dfc264a5357e706bd35f5550fa965c4ce564e7602eb852c3beb",
+    "latency_vs_throughput.svg": "3531b2a8687af2725bebd1c2cf43660ee98c3ea29746d685f5b897d8bb8dd60d",
+    "memory_vs_batch.png": "fb831f637d7d65bbed34ae7a301bd76c243ff4945315befe179931c4b9ac4dc4",
+    "memory_vs_batch.svg": "e9376f03810b98f472ea813fe08451cb2fe8f671df5b15502d5e2b87d8fe94d5",
+    "per_level_time.png": "d6e2f98278aa912c8d29bf2574327c8c78e850a88e6194826bab0d8036541969",
+    "per_level_time.svg": "d6119e98575fb56e7898b6f5bdd5ed50b7aae57200ec3dbc95870de896714ab2",
+    "per_level_total_time.png": "3a19847dc17f9c93ce59f18d534239a8801cee668fb5f1c0a898ef3dd1f95d69",
+    "per_level_total_time.svg": "d2dc39ce229f02881938186969345cd83852529b728613dce227c52bbfe4f850",
+    "predicted_vs_measured.png": "1472b177c6def7118158a83026e825b648bc4a2a2ba83e6439761f4d8957927a",
+    "predicted_vs_measured.svg": "5dcec76f991de6fc48dddb232d7714222d03f69d3df4aa86275de8324d5f1b67",
+    "step0_level1_rmse_vs_prompt.png": "1d826765096b7e9301bf3c7c19d7ef8bce303f4f4c2bd457052894e769564a77",
+    "step0_level1_rmse_vs_prompt.svg": "310e4e763148e14b39671ddca8920c0220f4742c7c3a716791257fa7af34104c",
+    "step0_relative_l2.png": "cfbc2f5df588dcaeb621a782b51b57bb3d2dfb454c138d8e35a3c7735c4f2117",
+    "step0_relative_l2.svg": "ac9ff1414914b247eaac018ce70fc152860daaf8e29c7eb23682200564ac68df",
+    "throughput_vs_batch.png": "25b22f0ec6efc75dca84e7685605850b58afb7d8696d094352d1463df096323b",
+    "throughput_vs_batch.svg": "1d6d9d063186375a831954317c659a9eac15bfff3a4f1acdcca865b79728634a"
+  },
+  "plot_cfg": 1.0,
+  "plot_batch": 4
+}
