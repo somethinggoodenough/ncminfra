@@ -1,0 +1,32 @@
+{
+  "schema": "ncm-benchmark-v1",
+  "command": [
+    "/Users/orangewhitecat/ncminfra/benchmarks/plots.py",
+    "--out",
+    "reports/figures/step0"
+  ],
+  "matplotlib": "3.10.7",
+  "source_sha256": {
+    "plots.py": "c6c82be412e7939608b52bee0b8cff42dc74941f634e84009d0c3583eff0309f",
+    "core.py": "f10c719f5c0bd6d1eeb99bfd312152424208ee53adce08f17bd7d2d5b0ebcabf"
+  },
+  "inputs": {
+    "step0": {
+      "prompts": 9,
+      "pearson_r": -0.8875406347264351,
+      "source_sha256": "35b86b6c8b2db20bcbf42f6969e4a143eb0885e0a895169000f03e0af2258254"
+    }
+  },
+  "figures": [
+    "step0_relative_l2",
+    "step0_level1_rmse_vs_prompt"
+  ],
+  "figure_sha256": {
+    "step0_relative_l2.svg": "96032a5f53a700aeb48e62fd068488ce203e2742da60583ace4258b74eac7b38",
+    "step0_level1_rmse_vs_prompt.svg": "9769d8f244a982f542ba6f13d0ca14a542b70c70b7d2869d762cc30f6cd0326b",
+    "step0_level1_rmse_vs_prompt.png": "bfe87acbe37ba1fb4991446e30d2ffb01a0e4ee904c395eb8f42ce0b603b153d",
+    "step0_relative_l2.png": "cfbc2f5df588dcaeb621a782b51b57bb3d2dfb454c138d8e35a3c7735c4f2117"
+  },
+  "plot_cfg": 1.0,
+  "plot_batch": 4
+}
