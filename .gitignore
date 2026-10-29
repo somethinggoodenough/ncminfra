@@ -1,4 +1,5 @@
 .venv/
+.cache/
 artifacts/
 data/
 __pycache__/

@@ -189,7 +189,7 @@ To add a new implementation as a third system, see the adapter interface in [`be
 - **Scope.** FP32 only, TF32 off, greedy sampling, WMT14 only, one consumer GPU. There are no multi-GPU results.
 - **CUDA exactness.** Checked on 1024 prompts per cell, not the full 3003.
 - **CPU enqueue in GPU-bound cells.** Enqueue times rise to 26–46 ms in the largest eager cells. This is most likely launch-queue back-pressure, not real CPU cost, so read CPU cost from the launch-bound cells instead.
-- **Git provenance.** In all four runs, `git rev-parse` failed. The manifests record an error for `root_git` and `upstream_git`, yet `run.json` still reports `provenance_valid: true`. Source and asset SHA-256 fingerprints are intact.
+- **Git provenance.** In all four runs, `git rev-parse` exited 128 because of Git's `dubious ownership` check: the benchmark ran as a sandbox user that does not own the repository. The manifests therefore record an error for `root_git` and `upstream_git`, yet `run.json` still reports `provenance_valid: true`. The code is recoverable from the recorded source SHA-256 fingerprints. After CRLF normalization (Windows checkout), all 19 match `benchmarks/` at ncminfra `a9ceb48` (unchanged at `6fd3b17`) and `upstream/ncm` at `e441cc5`.
 
 ## Roadmap
 
@@ -197,7 +197,8 @@ Each item is ordered by what the measurements above point to. Each one goes thro
 
 **R0. Housekeeping (now)**
 
-- Treat a git provenance failure as `provenance_valid: false`, and fix `safe.directory` on Windows.
+- Add `safe.directory` for the benchmark user (root cause found: sandbox user ≠ repo owner), and treat any git provenance failure as `provenance_valid: false`.
+- Normalize line endings (`.gitattributes`, or hash LF-normalized content) so source fingerprints match across Windows and Linux checkouts.
 - Remove the orphan `worktrees/*` gitlinks and the tracked `.cache/` files.
 
 **R1. Hardware-aware cost model and correlation**
