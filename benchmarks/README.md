@@ -80,6 +80,91 @@ kernel-only 时间。profile 与 E2E 分开执行，不能把其分段之和当�
 level 0 还包含 prompt 准备，cache 的 level 1 总区间包含 cache prefill。总区间与
 stack/prefill 区间互相嵌套，不能重复相加；生成后的 latent 重建单独记录。
 
+## Nsight Systems：逐 stack 拆解
+
+先采 kernel trace，再拟合 cost model。此次固定两组 cache 配置：B=1、CFG=0
+用于检查 launch-bound 的约 8 ms；B=8、CFG=1 用于检查 GPU-bound 配置，尤其是
+16–64 token-rows 的小 level。`token_rows` 由真实 stack 输入的 batch × sequence
+计算，已包含 CFG 的 batch 翻倍。代码和以下命令尚未在目标机器测试。
+
+在原 Windows / RTX 4060 机器运行，以便和此前 WDDM 数据比较。使用装有 CUDA
+PyTorch 和本项目依赖的 Python；`nsys` 需要在 PATH 中，Windows 下使用管理员终端。
+保留 `nsys --version` 输出及采集日志，先检查日志中是否有丢失 trace 的提示。
+命令按单行给出，PowerShell 和 bash 均不需要续行符。每次重跑换新的输出名。
+
+```text
+nsys --version
+python -c "from pathlib import Path; Path('reports/raw').mkdir(parents=True, exist_ok=True)"
+nsys profile --trace=cuda,nvtx --sample=none --cpuctxsw=none --capture-range=cudaProfilerApi --capture-range-end=stop --output=reports/raw/nsys-cache-b1-cfg0 python -m benchmarks.wmt14 --mode profile --nvtx --systems cache --batches 1 --cfg 0 --n 1024 --windows 5 --profile-batches 16 --output reports/raw/nsys-cache-b1-cfg0-run
+nsys profile --trace=cuda,nvtx --sample=none --cpuctxsw=none --capture-range=cudaProfilerApi --capture-range-end=stop --output=reports/raw/nsys-cache-b8-cfg1 python -m benchmarks.wmt14 --mode profile --nvtx --systems cache --batches 8 --cfg 1 --n 1024 --windows 5 --profile-batches 16 --output reports/raw/nsys-cache-b8-cfg1-run
+nsys export --type=sqlite --output=reports/raw/nsys-cache-b1-cfg0.sqlite reports/raw/nsys-cache-b1-cfg0.nsys-rep
+nsys export --type=sqlite --output=reports/raw/nsys-cache-b8-cfg1.sqlite reports/raw/nsys-cache-b8-cfg1.nsys-rep
+python -m benchmarks.nsys --trace reports/raw/nsys-cache-b1-cfg0.sqlite reports/raw/nsys-cache-b1-cfg0-run --trace reports/raw/nsys-cache-b8-cfg1.sqlite reports/raw/nsys-cache-b8-cfg1-run --output reports/raw/nsys-stack-table
+```
+
+`--nvtx` 仅用于 profile；profile 允许 `--systems cache`，质量检查仍会运行 eager
+reference 并覆盖全部 1024 条输入。保持原有 warmup 和精确输出门槛：每窗 16 个
+profile batch、五窗，每个 stack 有 80 次观测。每个 profile batch 仍比较插桩前后
+codes 和最终 IDs。初始化、首轮质量检查和首轮 warmup 不采集；在首个 profile
+窗口用 `cudaProfilerStart` 开始，全部窗口后 `cudaProfilerStop` 结束。后续 warmup
+和未插桩的对照执行会出现在 trace 中，但没有 stack 标签，不计入汇总。
+
+NVTX 的 `ncm_stack:` 标签包含 manifest SHA-256、system、B、CFG、window、
+profile batch、stack 名和输入形状。标记由首层 pre-hook 和末层 forward hook
+包住完整 stack，cache prefill 单独命名；candidate 的 `span("level_N", ...)`
+和 `span("cache_prefill", ...)` 使用同一格式，`level_total_N` 不重复统计。
+逐 stack 不加入同步。`--nvtx` 未启用时不发 NVTX，也不启动 CUDA profiler。
+
+汇总使用 CPU range 内、同线程的 CUDA API，再通过 process ID 和 correlation ID
+找到实际 GPU kernel，允许 kernel 在 CPU range 关闭之后执行。输出目录包含：
+
+| 文件 | 内容 |
+|---|---|
+| `report.md` / `summary.csv` | 两组配置的逐 stack 表，按调用取算术平均；包含 N、X、Σ kernel、Σ gap、GPU span、CUDA-event span |
+| `stacks.csv` | 每次 stack 调用的原始分解、window/batch、kernel 数范围分析所需数据及边界差值 |
+| `kernels.csv` | 每个 kernel 的完整名称、持续时间、stream、CUDA API 和 CPU/GPU 时间戳 |
+| `kernel_summary.csv` | 每个 stack 按 kernel 名汇总的次数、平均 µs 和每次 stack 的总 ms，按耗时排序 |
+| `gaps.csv` | 每两个相邻 kernel 间的 gap，以及该 gap 在下一次 launch API 开始前/后的分量 |
+| `manifest.json` | 输入 SQLite、benchmark manifest/run 和输出文件哈希、分析脚本哈希 |
+
+分析器要求 run 为 `COMPLETE` 且 provenance 有效，核对原始文件哈希、NVTX 中的
+manifest 哈希、全部计划窗口和 stack；缺标记、无 kernel、重叠或多 stream 会报错。
+SQLite 汇总只依赖 Python 标准库，可把两份 SQLite 和两个完整 run 目录复制回 Mac
+分析。保留 `.nsys-rep` 供 GUI 查看；旧 run 没有 NVTX，不能补算 kernel 数。
+
+表中定义（同一 stream，首个 kernel 开始到末个 kernel 结束）：
+
+```text
+N = kernel execution count
+X = Σ kernel duration / N
+Σ gap = Σ (next_kernel.start - previous_kernel.end)
+GPU span = N × X + Σ gap
+event boundary residual = CUDA-event span - GPU span
+```
+
+kernel/gap 的单位在 CSV 列名中明确区分 ms 和 µs。汇总用算术平均，X 用总 kernel
+时间除以总 kernel 数，因此平均后的等式仍成立；不把各列的中位数相加。
+event residual 包含首尾等待和插桩边界差异，单独报告，不混进内部 gap。
+Σ gap 表示当前 stack 的 kernel 之间的时间，可能包含 memcpy、其他 GPU 工作或
+驱动调度；它既不等于整张 GPU 空闲时间，也不能直接全部称为 CPU launch overhead。
+API 开始前/后的 gap 分量只是时间轴切分，也不等于因果归属。
+
+回答这两个问题时，先检查 kernel/gap/event 三者能否对上，再按 kernel 名和时间
+排序。若约 8 ms 主要在 gaps，查看长 gap 前后的 CPU launch 和 WDDM 调度；若主要
+在 kernels，N × X 才是主要解释。对 16–64 rows，1.25 ms 只是 340 MB / 272 GB/s
+的理想读权重下界，不是可从实测时间中扣除的独立阶段。需要区分 GEMM、attention、
+norm/activation、RoPE、KV 拼接/搬运等实际 kernel；低有效带宽、额外流量和调度
+均是待验证解释。nsys 可以定位时间消耗，但不能单凭 kernel 名确认 DRAM 利用率；
+若时间主要在某些 kernel 内，再对这些 kernel 使用 Nsight Compute 验证。
+
+采集会扰动 launch-bound 时间。请先在同机保留一份无 nsys、无 `--nvtx` 的 profile
+作为对照，再与 trace 比较；不要把历史 8 ms 强行当作新 trace 的固定总时长。
+这些采集与验证由目标机器执行，本地尚未运行。
+
+接口和关联方法依据 NVIDIA 的
+[Nsight Systems User Guide](https://docs.nvidia.com/nsight-systems/UserGuide/index.html) 与
+[Analysis Guide / SQLite schema](https://docs.nvidia.com/nsight-systems/AnalysisGuide/index.html)。
+
 ## Latency vs throughput
 
 `serving` 是一个单 GPU、单 worker 的开放环 trace 执行器：用固定随机种子的

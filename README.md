@@ -103,7 +103,7 @@ The profile spans sum to within 1.5% of uninstrumented E2E batch latency in ever
 
 **At large batch, stacks become compute-bound.** At CFG=1, B=8, eager level 0 runs 1536 rows in 42.1 ms. The stack is about 170 MFLOP per row (matmuls only), so that is about **6.2 TFLOPS**, roughly 40% of the card's ~15 TFLOPS FP32 peak.
 
-Weight streaming never binds in these configurations. Reading the ~340 MB of FP32 stack weights at 272 GB/s takes about 1.25 ms, far below the 8 ms launch floor.
+Reading the ~340 MB of FP32 stack weights once at the card's peak 272 GB/s takes about 1.25 ms. This is an ideal lower bound, not a measured weight-read time. It does not explain the 4.3–5.9 ms GPU spans of cache levels with 16–64 rows: kernel execution, inter-kernel gaps, effective bandwidth and other tensor traffic still need to be separated with Nsight Systems before fitting a cost model.
 
 <p align="center"><img src="reports/benchmark-2026-10-29/figures/predicted_vs_measured.png" width="70%" alt="Predicted vs measured stack speedup"></p>
 
@@ -195,23 +195,26 @@ To add a new implementation as a third system, see the adapter interface in [`be
 
 Each item is ordered by what the measurements above point to. Each one goes through the proposal → approval → report flow in [`reports/`](reports/) before any implementation. IDs in parentheses refer to the candidate work packages in the kickoff checklist.
 
-**R0. Housekeeping (now)**
+**R0. Housekeeping (implemented)**
 
 - Add `safe.directory` for the benchmark user (root cause found: sandbox user ≠ repo owner), and treat any git provenance failure as `provenance_valid: false`.
 - Normalize line endings (`.gitattributes`, or hash LF-normalized content) so source fingerprints match across Windows and Linux checkouts.
 - Remove the orphan `worktrees/*` gitlinks and the tracked `.cache/` files.
 
-**R1. Hardware-aware cost model and correlation**
+**R1. Kernel-level breakdown with Nsight Systems (next)**
+
+- Wrap each transformer stack, including the separate cache prefill, in an NVTX range through `NativeProfile`.
+- Capture cache B=1, CFG=0 (launch-bound) and cache B=8, CFG=1 (GPU-bound) on the original Windows/RTX 4060 machine.
+- Produce a per-stack table of kernel count, Σ kernel time and Σ inter-kernel gap, with kernel names and launch timestamps for attribution. The capture and export commands are in [`benchmarks/README.md`](benchmarks/README.md#nsight-systems逐-stack-拆解).
+- Test whether the ~8 ms span closes as N × mean kernel duration + Σ gap, accounting separately for event-boundary wait. For the 16–64-row cache levels, locate the difference between the 4.3–5.9 ms span and the ideal 1.25 ms weight-read lower bound.
+- *Done when* real traces support that table and distinguish kernel execution from submission/scheduling gaps. The instrumentation and analyzer are prepared; target-machine validation and collection are pending.
+
+**R2. Hardware-aware cost model and correlation (after R1)**
 
 - Replace `(P+L)/L` with `max(launch floor, compute term, weight-streaming term)`, with parameters derived from device specs and calibrated on the profile data.
 - Plot predicted vs measured **absolute** stack time, and report an error table per regime.
+- Use the kernel counts and execution/gap split from R1 to calibrate each regime.
 - *Done when* the model and its error table are generated from raw records by `benchmarks/plots.py`.
-
-**R2. Kernel-level breakdown with Nsight Systems**
-
-- Measure kernel count per stack, per-kernel duration and launch gaps.
-- Explain the ~8 ms CPU floor and the ~4.9 ms GPU-side floor at small shapes, and confirm or reject the back-pressure explanation for inflated enqueue times.
-- *Done when* a per-stack kernel table backs each regime in R1.
 
 **R3. Upstream PR #5 as the third system (F01)**
 
@@ -228,7 +231,7 @@ Each item is ordered by what the measurements above point to. Each one goes thro
 **R5. CUDA Graphs for the launch-bound regime**
 
 - Every shape is static: a 96-token prefix and fixed level lengths, so one graph can be captured per (B, CFG, level).
-- The expected ceiling comes from R2's GPU-side floor.
+- The expected ceiling comes from R1's measured kernel execution time.
 - The exact-output quality gate stays unchanged.
 
 **R6. Level-aware continuous batching (F04)**
@@ -236,7 +239,7 @@ Each item is ordered by what the measurements above point to. Each one goes thro
 - Batch same-level work across requests so stacks cross the ~250-row regime boundary.
 - Evaluate with the open-loop harness, reporting goodput under an explicit latency SLO.
 
-**R7. Kernels, only where R2 shows they matter (F03, F02)**
+**R7. Kernels, only where R1 shows they matter (F03, F02)**
 
 - Attention over `[prefix K/V | level K/V]` with a joint softmax instead of `torch.cat`.
 - Fused norm/RoPE, and a sampling fast path.
