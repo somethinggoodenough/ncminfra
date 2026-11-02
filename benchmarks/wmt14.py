@@ -799,8 +799,9 @@ def main(argv=None):
         failed = True
         print("assets changed during run", file=sys.stderr)
     status = "FAILED" if failed else ("PARTIAL" if unsupported else "COMPLETE")
+    git_ok = "error" not in m["root_git"] and "error" not in m["upstream_git"]
     write_json(output / "run.json", {"schema": SCHEMA, "status": status,
-        "provenance_valid": assets_unchanged,
+        "provenance_valid": assets_unchanged and git_ok,
         "manifest_sha256": digest(output / "manifest.json"), "windows_sha256": digest(window_path),
         "quality_sha256": digest(quality_path)})
     return 1 if failed else 0

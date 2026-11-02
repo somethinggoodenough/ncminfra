@@ -34,7 +34,8 @@ def verify_fingerprint(expected: dict[str, str]) -> None:
 
 def git_info(path: Path) -> dict:
     def git(*args):
-        return subprocess.run(["git", "-C", str(path), *args], text=True,
+        return subprocess.run(["git", "-c", f"safe.directory={path.resolve().as_posix()}",
+                               "-C", str(path), *args], text=True,
                               capture_output=True, check=True).stdout
     try:
         return {"head": git("rev-parse", "HEAD").strip(),
