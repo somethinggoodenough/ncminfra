@@ -211,6 +211,14 @@ decoder+argmax。
 这套工具仍是单进程共享模型比较；需要多个独立模型副本或多 stream 的实现应
 另建隔离进程 benchmark，不要把这里的单 stream events 当多 stream 总时间。
 
+候选还可提供 `configure(*, batch_sizes, cfg)`。每个 cell 在质量检查前、候选未激活时
+调用一次，只传入本 cell 需要支持的实际 batch 大小和 CFG。E2E/profile 包含尾批
+大小；serving 包含 `1..max B` 全部大小，覆盖低负载和请求队列末尾的小 batch。
+`configure()` 只保存配置，持久 GPU buffer 和 capture 均放在随后每次 `activate()`
+中完成；`deactivate()` 后仍保留这份 CPU 配置，供下个窗口重新激活。计划中的
+`candidate_batch_sizes` 会写入 manifest。该接口不改变 eager reference、精确 codes/IDs
+比较或 warmup 门槛。
+
 候选如需出现在逐 level 图，额外实现
 `generate_profiled(prefix, cfg, eos, profiler)`，运算与 `generate` 相同，在每个
 transformer stack 的实际范围使用：
@@ -238,8 +246,48 @@ python -m benchmarks.wmt14 --mode e2e \
   --output reports/raw/bench-e2e-three
 ```
 
-`--candidate-source` 可以重复；adapter 导入的其余自有源码都应列出。重复用于
-profile 和 serving 的命令，以生成对应三系统图。
+`--candidate-source` 可以重复，接受单个文件或目录；目录递归收集所有 `.py` 文件，
+不存在的路径和没有 Python 文件的目录会报错。adapter 导入的其余自有源码都应
+列出，确保安装包实际来自被指纹记录的 checkout。重复用于 profile 和 serving
+的命令，以生成对应三系统图。
+
+### NCMserving CUDA Graphs candidate
+
+CUDA Graphs 的实现和 adapter 位于独立的 NCMserving 仓库，ncminfra 负责配置 shape、
+质量检查、测量和 provenance。以下假设目标机把两个仓库并排放置；路径不同则
+替换 `../NCMserving`。先安装本次实现对应的 NCMserving checkout：
+
+```text
+python -m pip install -e ../NCMserving
+```
+
+手动 `torch.cuda.graph` 按 `(B, CFG, level)` capture stack，prefill 单独一张，
+level 0 不与 prefill 合并。prefix K/V、level input 和 padding bias/mask 的 static
+buffer 在 `activate()` 中分配，并在每次请求原位更新。采样、head、latent 更新
+保持原路径；capture 范围内没有 `.item()` 或依赖 tensor 值的 Python 分支。
+这轮用于单独测量 Graphs，不叠加 R3 的 prefill 删除优化。
+
+先测 profile 与 E2E。质量检查仍覆盖每个 cell 的全部 1024 条输入，五个窗口，
+profile 每窗 16 个 batch；输出必须与 eager 精确一致，失败记录不会进入性能图。
+下列命令采用单行形式，可在 PowerShell 或 bash 中执行；每次运行使用新输出目录。
+
+```text
+python -m benchmarks.wmt14 --mode profile --systems eager,cache,candidate --candidate ../NCMserving/adapters/ncminfra_cuda_graphs.py --candidate-source ../NCMserving/src/ncm_serving --batches 1,4,8 --cfg 0,1 --n 1024 --windows 5 --profile-batches 16 --output reports/raw/graphs-profile
+python -m benchmarks.wmt14 --mode e2e --systems eager,cache,candidate --candidate ../NCMserving/adapters/ncminfra_cuda_graphs.py --candidate-source ../NCMserving/src/ncm_serving --batches 1,4,8 --cfg 0,1 --n 1024 --windows 5 --output reports/raw/graphs-e2e
+```
+
+serving 的主要目标是 CFG=1、max B=4。harness 会提前配置 B=1、2、3、4 的 graphs，
+随后保持原有开放环到达 trace、动态成批和窗口后的逐 batch eager replay。下面的
+`5,10,20` 是负载扫描示例，应结合实测容量选取，不代表已经测出的吞吐：
+
+```text
+python -m benchmarks.wmt14 --mode serving --systems eager,cache,candidate --candidate ../NCMserving/adapters/ncminfra_cuda_graphs.py --candidate-source ../NCMserving/src/ncm_serving --batches 4 --cfg 1 --n 1024 --windows 5 --requests 10000 --arrival-rates 5,10,20 --output reports/raw/graphs-serving
+```
+
+初始化/capture 不计入窗口吞吐，但 graph/static buffer 的常驻显存会计入候选 peak
+allocated；切回 eager/cache 前仍要求释放到 baseline。未知 shape 或 capture 失败
+应直接报告，不在计时中隐式录图或悄悄改用另一路径。这些命令和 candidate 尚未
+在目标 GPU 上测试，没有 CUDA Graphs 的性能结论；质量门槛保持不变。
 
 ## 画图
 

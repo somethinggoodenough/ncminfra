@@ -193,7 +193,7 @@ To add a new implementation as a third system, see the adapter interface in [`be
 
 ## Roadmap
 
-Each item is ordered by what the measurements above point to. Each one goes through the proposal → approval → report flow in [`reports/`](reports/) before any implementation. IDs in parentheses refer to the candidate work packages in the kickoff checklist.
+The order below reflects the current priorities; roadmap IDs stay stable. Nsight Systems supplies the kernel evidence before cost-model fitting, and R5 CUDA Graphs is the primary optimization ahead of R3 prefill removal. Each item goes through the proposal → approval → report flow in [`reports/`](reports/) before implementation unless directly authorized. IDs in parentheses refer to the candidate work packages in the kickoff checklist.
 
 **R0. Housekeeping (implemented)**
 
@@ -208,6 +208,14 @@ Each item is ordered by what the measurements above point to. Each one goes thro
 - Produce a per-stack table of kernel count, Σ kernel time and Σ inter-kernel gap, with kernel names and launch timestamps for attribution. The capture and export commands are in [`benchmarks/README.md`](benchmarks/README.md#nsight-systems逐-stack-拆解).
 - Test whether the ~8 ms span closes as N × mean kernel duration + Σ gap, accounting separately for event-boundary wait. For the 16–64-row cache levels, locate the difference between the 4.3–5.9 ms span and the ideal 1.25 ms weight-read lower bound.
 - *Done when* real traces support that table and distinguish kernel execution from submission/scheduling gaps. The instrumentation and analyzer are prepared; target-machine validation and collection are pending.
+
+**R5. CUDA Graphs for the launch-bound regime (primary optimization)**
+
+- Implement in [NCMserving](https://github.com/somethinggoodenough/NCMserving), connected through a candidate adapter. ncminfra supplies measurement and the unchanged exact-output quality gate.
+- At serving CFG=1, max B=4, there are at most eight sequences. Cache target lengths 4–26 (zero-based levels 1–5) produce 32–208 rows, within the observed launch-floor regime; lower-load batches are smaller still. Level 6 has length 32 and reaches 256 rows at the maximum batch.
+- Capture one stack graph per (B, CFG, level) with manual `torch.cuda.graph`, plus a separate prefill graph. Allocate static prefix K/V, level inputs and padding masks in `activate()`; configure every actual serving batch size before timing. Keep tensor-value Python branches and `.item()` outside capture.
+- Retain the separate prefill for this ablation. Removing 7.8 ms alone from the observed 115.6 ms cache B=1 latency gives 107.8 ms versus 102.8 ms eager, or about 0.95×. This arithmetic estimate is not an R3 measurement.
+- The expected ceiling comes from R1's measured kernel execution time. Code and [candidate commands](benchmarks/README.md#ncmserving-cuda-graphs-candidate) are prepared; target-machine tests and performance results are pending.
 
 **R2. Hardware-aware cost model and correlation (after R1)**
 
@@ -227,12 +235,6 @@ Each item is ordered by what the measurements above point to. Each one goes thro
 - Use `torch.cuda.memory._record_memory_history()` snapshots to find out who owns the extra ~1.3 GiB in the cache path.
 - Rule out the reference cycle reported in upstream PR #4.
 - *Done when* the measured working set is explained to within 10% of a component-wise estimate.
-
-**R5. CUDA Graphs for the launch-bound regime**
-
-- Every shape is static: a 96-token prefix and fixed level lengths, so one graph can be captured per (B, CFG, level).
-- The expected ceiling comes from R1's measured kernel execution time.
-- The exact-output quality gate stays unchanged.
 
 **R6. Level-aware continuous batching (F04)**
 

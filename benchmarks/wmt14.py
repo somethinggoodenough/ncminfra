@@ -54,7 +54,7 @@ def args_parser():
                     help="eager,cache and optional candidate; each appears once")
     ap.add_argument("--candidate", type=Path, help="adapter .py implementing build(runtime)")
     ap.add_argument("--candidate-source", type=Path, action="append", default=[],
-                    help="additional source files used by the candidate; may repeat")
+                    help="additional source file or directory (recursive .py files); may repeat")
     ap.add_argument("--batches", default="1,4,8")
     ap.add_argument("--cfg", default="0,1")
     ap.add_argument("--n", type=int, default=1024)
@@ -362,6 +362,22 @@ class NativeProfile:
         return spans
 
 
+def candidate_source_files(paths):
+    files = []
+    for source in paths:
+        source = source.resolve()
+        if source.is_dir():
+            found = sorted(path for path in source.rglob("*.py") if path.is_file())
+            if not found:
+                raise ValueError(f"candidate source directory has no Python files: {source}")
+            files.extend(found)
+        elif source.is_file():
+            files.append(source)
+        else:
+            raise FileNotFoundError(f"candidate source does not exist: {source}")
+    return files
+
+
 def load_candidate(path, runtime):
     if path is None:
         return None
@@ -375,6 +391,17 @@ def load_candidate(path, runtime):
         raise ValueError("candidate must expose generate(prefix, cfg, eos)")
     runtime.check_state()
     return candidate
+
+
+def candidate_configure(runtime, candidate, batch_sizes, cfg):
+    if getattr(runtime, "candidate_active", False):
+        raise RuntimeError("candidate must be inactive before cell configuration")
+    if candidate is not None and callable(getattr(candidate, "configure", None)):
+        before = torch.cuda.memory_allocated(runtime.device)
+        candidate.configure(batch_sizes=tuple(batch_sizes), cfg=cfg)
+        runtime.check_state()
+        if torch.cuda.memory_allocated(runtime.device) > before:
+            raise RuntimeError("candidate.configure must not allocate persistent GPU state; use activate()")
 
 
 def candidate_activate(runtime, candidate):
@@ -759,7 +786,7 @@ def main(argv=None):
                      for p in base.rglob("*.py")]
     if a.candidate:
         source_files.append(a.candidate.resolve())
-        source_files.extend(p.resolve() for p in a.candidate_source)
+        source_files.extend(candidate_source_files(a.candidate_source))
     source_hashes = fingerprint(source_files)
     assets = [a.config, a.sources, a.checkpoints / "generator.pt", a.checkpoints / "tokenizer.pt"]
     assets.extend(p for p in a.tokenizer.iterdir() if p.is_file())
@@ -779,6 +806,8 @@ def main(argv=None):
         for batch in batches:
             for rate in (rates if a.mode == "serving" else [None]):
                 plan.append({"cfg": cfg, "batch_size": batch, "arrival_rate_per_second": rate,
+                             "candidate_batch_sizes": (list(range(1, batch + 1)) if a.mode == "serving"
+                                 else sorted({len(ids) for ids in batch_ids(a.n, batch)})) if candidate else [],
                              "orders": balanced_order(systems, a.windows, a.seed + batch + int(cfg * 1000))})
     m = manifest(a, runtime, systems, candidate, a.candidate, plan, source_hashes, asset_hashes)
     candidate_deactivate(runtime, candidate, force=True)
@@ -796,6 +825,7 @@ def main(argv=None):
             runtime.last_system = None
             try:
                 verify_fingerprint(source_hashes)
+                candidate_configure(runtime, candidate, cell["candidate_batch_sizes"], cfg)
                 q = quality(runtime, a, systems, ids_batches, cfg, candidate)
                 q.update(cfg=cfg, batch_size=a.current_batch)
                 quality_file.write(json.dumps(q, allow_nan=False) + "\n")
