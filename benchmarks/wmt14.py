@@ -54,12 +54,14 @@ def args_parser():
                     help="eager,cache and optional candidate; each appears once")
     ap.add_argument("--candidate", type=Path, help="adapter .py implementing build(runtime)")
     ap.add_argument("--candidate-source", type=Path, action="append", default=[],
-                    help="additional source files used by the candidate; may repeat")
+                    help="additional source file or directory (recursive .py files); may repeat")
     ap.add_argument("--batches", default="1,4,8")
     ap.add_argument("--cfg", default="0,1")
     ap.add_argument("--n", type=int, default=1024)
     ap.add_argument("--windows", type=int, default=5)
     ap.add_argument("--profile-batches", type=int, default=16)
+    ap.add_argument("--nvtx", action="store_true",
+                    help="annotate profile stacks and bracket capture with cudaProfilerApi (profile only)")
     ap.add_argument("--arrival-rates", default="", help="serving offered request rates per second")
     ap.add_argument("--requests", type=int, default=10000, help="requests per serving window")
     ap.add_argument("--warmup-min", type=int, default=10)
@@ -195,7 +197,7 @@ class Runtime:
 
 class NativeProfile:
     """Events around generator stacks and decoder; one CUDA stream, no sync per span."""
-    def __init__(self):
+    def __init__(self, nvtx_context=None):
         self.handles, self.stacks = [], []
         self.active = None
         self.decoder = None
@@ -203,6 +205,31 @@ class NativeProfile:
         self.level_totals = []
         self.open_spans = []
         self.net = None
+        self.nvtx_context = nvtx_context
+
+    def stack_name(self, index):
+        if self.system == "cache" and index == 1:
+            return "cache_prefill"
+        return f"level_{index - (self.system == 'cache' and index > 1)}"
+
+    def push_nvtx(self, item):
+        if self.nvtx_context is not None:
+            # Only actual stacks get ncm_stack labels; candidate total spans can
+            # surround them without counting their kernels a second time.
+            name = item["name"]
+            is_stack = name == "cache_prefill" or (
+                name.startswith("level_") and name.removeprefix("level_").isdigit())
+            prefix = "ncm_stack:" if is_stack else "ncm_span:"
+            label = {**self.nvtx_context, "system": self.system,
+                     "stack": name, "input_shape": item["input_shape"]}
+            torch.cuda.nvtx.range_push(prefix + json.dumps(label, separators=(",", ":")))
+            item["nvtx_open"] = True
+
+    @staticmethod
+    def pop_nvtx(item):
+        if item is not None and item.get("nvtx_open"):
+            torch.cuda.nvtx.range_pop()
+            item["nvtx_open"] = False
 
     @staticmethod
     def event():
@@ -239,13 +266,16 @@ class NativeProfile:
             if self.active is not None:
                 raise RuntimeError("overlapping transformer stacks")
             self.active = {"start": self.event(), "cpu_start_ns": time.perf_counter_ns(),
+                           "name": self.stack_name(len(self.stacks)),
                            "input_shape": list(inputs[0].shape)}
+            self.push_nvtx(self.active)
 
         def after(module, inputs, output):
             if self.active is None:
                 raise RuntimeError("missing stack start")
             self.active["cpu_end_ns"] = time.perf_counter_ns()
             self.active["end"] = self.event()
+            self.pop_nvtx(self.active)
             self.stacks.append(self.active)
             self.active = None
 
@@ -266,13 +296,17 @@ class NativeProfile:
                 "input_shape": list(input_shape) if input_shape is not None else None}
         self.open_spans.append(item)
         try:
+            self.push_nvtx(item)
             yield
         finally:
             if not self.open_spans or self.open_spans[-1] is not item:
                 raise RuntimeError("candidate profile spans must close in nested order")
             self.open_spans.pop()
-            item["cpu_end_ns"] = time.perf_counter_ns()
-            item["end"] = self.event()
+            try:
+                item["cpu_end_ns"] = time.perf_counter_ns()
+                item["end"] = self.event()
+            finally:
+                self.pop_nvtx(item)
             self.stacks.append(item)
 
     def start_decoder(self):
@@ -290,6 +324,8 @@ class NativeProfile:
         self.reconstruction["end"] = self.event()
 
     def remove(self):
+        # A failed forward may skip the last block's hook.
+        self.pop_nvtx(self.active)
         for handle in self.handles:
             handle.remove()
         self.handles = []
@@ -312,14 +348,8 @@ class NativeProfile:
         elif len(self.stacks) != expected or len(self.level_totals) != len(self.levels):
             raise RuntimeError(f"unexpected stack call count: {len(self.stacks)}, expected {expected}")
         spans = []
-        for index, item in enumerate(self.stacks):
-            if self.system == "candidate":
-                name = item["name"]
-            elif self.system == "cache" and index == 1:
-                name = "cache_prefill"
-            else:
-                name = f"level_{index - (self.system == 'cache' and index > 1)}"
-            spans.append({"name": name, "input_shape": item["input_shape"],
+        for item in self.stacks:
+            spans.append({"name": item["name"], "input_shape": item["input_shape"],
                           "gpu_ms": item["start"].elapsed_time(item["end"]),
                           "cpu_enqueue_ms": (item["cpu_end_ns"] - item["cpu_start_ns"]) / 1e6})
         for item in self.level_totals:
@@ -330,6 +360,22 @@ class NativeProfile:
             spans.append({"name": name, "gpu_ms": item["start"].elapsed_time(item["end"]),
                           "cpu_enqueue_ms": (item["cpu_end_ns"] - item["cpu_start_ns"]) / 1e6})
         return spans
+
+
+def candidate_source_files(paths):
+    files = []
+    for source in paths:
+        source = source.resolve()
+        if source.is_dir():
+            found = sorted(path for path in source.rglob("*.py") if path.is_file())
+            if not found:
+                raise ValueError(f"candidate source directory has no Python files: {source}")
+            files.extend(found)
+        elif source.is_file():
+            files.append(source)
+        else:
+            raise FileNotFoundError(f"candidate source does not exist: {source}")
+    return files
 
 
 def load_candidate(path, runtime):
@@ -345,6 +391,17 @@ def load_candidate(path, runtime):
         raise ValueError("candidate must expose generate(prefix, cfg, eos)")
     runtime.check_state()
     return candidate
+
+
+def candidate_configure(runtime, candidate, batch_sizes, cfg):
+    if getattr(runtime, "candidate_active", False):
+        raise RuntimeError("candidate must be inactive before cell configuration")
+    if candidate is not None and callable(getattr(candidate, "configure", None)):
+        before = torch.cuda.memory_allocated(runtime.device)
+        candidate.configure(batch_sizes=tuple(batch_sizes), cfg=cfg)
+        runtime.check_state()
+        if torch.cuda.memory_allocated(runtime.device) > before:
+            raise RuntimeError("candidate.configure must not allocate persistent GPU state; use activate()")
 
 
 def candidate_activate(runtime, candidate):
@@ -488,17 +545,41 @@ def run_window(runtime, a, system, cfg, batches, candidate, window):
             "batches": records}
 
 
+@contextmanager
+def nsys_capture(enabled):
+    """Start lazily after initial quality/warmup; stop even if profiling fails."""
+    started = False
+
+    def start():
+        nonlocal started
+        if enabled and not started:
+            torch.cuda.profiler.start()
+            started = True
+
+    try:
+        yield start
+    finally:
+        if started:
+            try:
+                torch.cuda.synchronize()
+            finally:
+                torch.cuda.profiler.stop()
+
+
 def profile_window(runtime, a, system, cfg, batches, candidate, window):
     if system == "candidate" and not callable(getattr(candidate, "generate_profiled", None)):
         return {"status": "UNSUPPORTED_PROFILE", "reason": "candidate has no generate_profiled method",
                 "system": system, "cfg": cfg, "batch_size": a.current_batch, "window": window}
     records = []
+    manifest_sha = digest(a.output / "manifest.json") if a.nvtx else None
     for i in range(a.profile_batches):
         prefix = runtime.cpu_batch(batches[i % len(batches)])
         set_seed(a.seed + i)
         plain_ids, plain_codes = runtime.run(system, prefix, cfg, candidate, capture_codes=True)
         set_seed(a.seed + i)
-        probe = NativeProfile()
+        probe = NativeProfile(nvtx_context={"manifest_sha256": manifest_sha,
+            "batch_size": len(prefix), "cfg": cfg,
+            "window": window, "profile_batch": i} if a.nvtx else None)
         ids, codes = runtime.run(system, prefix, cfg, candidate, capture_codes=True, profile=probe)
         torch.cuda.synchronize(runtime.device)
         if not torch.equal(ids, plain_ids) or not torch.equal(codes, plain_codes):
@@ -652,6 +733,9 @@ def manifest(a, runtime, systems, candidate, candidate_path, plan, sources, asse
             "prefix_length": runtime.P, "levels": runtime.levels, "eos": runtime.eos, "pad": runtime.pad,
             "temperature": 1., "top_k": 1, "top_p": 0., "seed": a.seed},
         "protocol": {"windows_per_cell": a.windows, "order": "seeded rotating paired windows",
+            "nvtx": a.nvtx,
+            "nsys_capture": "first profile window through last cell" if a.nvtx else None,
+            "profile_batches_per_window": a.profile_batches,
             "warmup_min": a.warmup_min, "warmup_max": a.warmup_max,
             "warmup_group": a.warmup_group, "warmup_tolerance": a.warmup_tolerance,
             "exploratory": a.windows < 5,
@@ -670,8 +754,10 @@ def main(argv=None):
     batches = csv_values(a.batches, int)
     cfgs = csv_values(a.cfg, float)
     rates = csv_values(a.arrival_rates, float) if a.arrival_rates else []
-    if not set(systems) <= {"eager", "cache", "candidate"} or "eager" not in systems:
-        raise ValueError("systems must include eager and may include cache,candidate")
+    if not set(systems) <= {"eager", "cache", "candidate"} or ("eager" not in systems and a.mode != "profile"):
+        raise ValueError("systems may include eager,cache,candidate; eager is required outside profile mode")
+    if a.nvtx and a.mode != "profile":
+        raise ValueError("--nvtx requires --mode profile")
     if ("candidate" in systems) != (a.candidate is not None):
         raise ValueError("candidate system and --candidate must be supplied together")
     if any(x <= 0 for x in batches) or any(x not in (0., 1.) for x in cfgs):
@@ -700,7 +786,7 @@ def main(argv=None):
                      for p in base.rglob("*.py")]
     if a.candidate:
         source_files.append(a.candidate.resolve())
-        source_files.extend(p.resolve() for p in a.candidate_source)
+        source_files.extend(candidate_source_files(a.candidate_source))
     source_hashes = fingerprint(source_files)
     assets = [a.config, a.sources, a.checkpoints / "generator.pt", a.checkpoints / "tokenizer.pt"]
     assets.extend(p for p in a.tokenizer.iterdir() if p.is_file())
@@ -720,6 +806,8 @@ def main(argv=None):
         for batch in batches:
             for rate in (rates if a.mode == "serving" else [None]):
                 plan.append({"cfg": cfg, "batch_size": batch, "arrival_rate_per_second": rate,
+                             "candidate_batch_sizes": (list(range(1, batch + 1)) if a.mode == "serving"
+                                 else sorted({len(ids) for ids in batch_ids(a.n, batch)})) if candidate else [],
                              "orders": balanced_order(systems, a.windows, a.seed + batch + int(cfg * 1000))})
     m = manifest(a, runtime, systems, candidate, a.candidate, plan, source_hashes, asset_hashes)
     candidate_deactivate(runtime, candidate, force=True)
@@ -728,7 +816,7 @@ def main(argv=None):
     window_path, quality_path = output / "windows.jsonl", output / "quality.jsonl"
     failed = False
     unsupported = False
-    with window_path.open("x") as window_file, quality_path.open("x") as quality_file:
+    with window_path.open("x") as window_file, quality_path.open("x") as quality_file, nsys_capture(a.nvtx) as start_capture:
         for cell in plan:
             a.current_batch = cell["batch_size"]
             cfg = cell["cfg"]
@@ -737,6 +825,7 @@ def main(argv=None):
             runtime.last_system = None
             try:
                 verify_fingerprint(source_hashes)
+                candidate_configure(runtime, candidate, cell["candidate_batch_sizes"], cfg)
                 q = quality(runtime, a, systems, ids_batches, cfg, candidate)
                 q.update(cfg=cfg, batch_size=a.current_batch)
                 quality_file.write(json.dumps(q, allow_nan=False) + "\n")
@@ -763,6 +852,7 @@ def main(argv=None):
                                     record["status"] = "QUALITY_FAIL"
                                     record["reason"] = "measured final IDs differ from quality reference"
                             elif a.mode == "profile":
+                                start_capture()
                                 record = profile_window(runtime, a, system, cfg, ids_batches, candidate, window)
                             else:
                                 record = serving_window(runtime, a, system, cfg, candidate, window,
